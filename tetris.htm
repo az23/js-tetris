@@ -1,0 +1,62 @@
+<html>
+<meta name="viewport" content="width=device-width, initial-scale=0.8, user-scalable=no" />
+<body>
+<style>
+#gb{
+	background-image:url("gb.png");
+	background-repeat: no-repeat;
+	background-size: 100% 100%;
+	height:800px;
+	width:500px;
+}
+.gbbutt{
+	position:absolute;
+	background-color:#FF0000;
+	height:50px;
+	width:50px;
+	opacity:0;
+}
+
+#abutton{
+	top:500px;
+	left:410px;
+}
+#bbutton{
+	top:540px;
+	left:330px;
+}
+#dpadl{
+	top:525px;
+	left:35px;
+}
+#dpadr{
+	top:525px;
+	left:140px;
+}
+#dpadd{
+	top:590px;
+	left:85px;
+}
+</style>
+<div id="gb">
+<div class=gbbutt id=abutton onclick="abutton()"></div>
+<div class=gbbutt id=bbutton onclick="bbutton()"></div>
+<div class=gbbutt id=dpadl onclick= "moveLeft()"></div>
+<div class=gbbutt id=dpadr onclick= "moveRight()"></div>
+<div class=gbbutt id=dpadd onclick= "moveDown()"></div>
+<script type="text/javascript" src="midiDecoder.js"></script>
+<script>
+var midiData;
+var xhttp = new XMLHttpRequest();
+	xhttp.open('GET','A.mid',true);
+	xhttp.responseType = 'arraybuffer';
+	xhttp.onload = function() {
+			LoadMidi(xhttp.response);
+		}
+	xhttp.send();
+</script>
+<script type="text/javascript" src="gebas.js"></script>
+<script type="text/javascript" src="tetris.js"></script>
+</div>
+</body>
+</html>
