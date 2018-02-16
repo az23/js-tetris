@@ -28,6 +28,7 @@ loadSample('samples/level.mp3',4,0,0);
 loadSample('samples/gameover.mp3',5,0,0);
 loadSample('samples/rotate.mp3',6,0,0);
 loadSample('samples/pause.mp3',7,0,0);
+loadSample('samples/shift.mp3',8,0,0);
 
 
 

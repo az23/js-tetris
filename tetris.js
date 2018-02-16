@@ -2,7 +2,7 @@
 //az23
 "use strict";
 //globals
-const version = 1.3;
+const version = 1.31;
 var pf;
 var c;
 var ctx;
@@ -40,20 +40,20 @@ function init(w,h){
 }
 
 function abutton(){
-	if(game.state=="live"){
+	if(game.state=="live" &&cur){
 		rotateBrick(cur);
 		playSample(6,0,0,512,0,false);	
 	}
 }
 function bbutton(){
-	if(game.state=="live"){
+	if(game.state=="live" && cur){
 		rotateBrick(rotateBrick(rotateBrick(cur)))
 		playSample(6,0,0,512,0,false);
 	}	
 }
 
 function moveLeft(){
-	if(game.state=="live"){
+	if(game.state=="live"&& cur){
 		if(canMove(cur,(cur.x)-1,cur.y)){
 			cur.x--;
 			playSample(0,0,0,512,0,false);
@@ -61,7 +61,7 @@ function moveLeft(){
 	}
 }
 function moveRight(){
-	if(game.state=="live"){
+	if(game.state=="live" && cur){
 		if(canMove(cur,(cur.x)+1,cur.y)){
 			cur.x++;
 			playSample(0,0,0,512,0,false);
@@ -69,7 +69,7 @@ function moveRight(){
 	}
 }
 function moveDown(){
-	if(game.state=="live"){
+	if(game.state=="live" && cur){
 		if(canMove(cur,cur.x,(cur.y)+1)){
 			cur.y++;
 		}
@@ -80,7 +80,6 @@ function setListeners(){
 	window.onkeydown = function (e) {
 		e.preventDefault();
 		let key = e.keyCode;
-		console.log(key);
 		switch (key) {
 		case 32:
 			pauseGame();
@@ -122,16 +121,20 @@ function startGame(){
 //per gameclock
 function doGame(){
 	if(game.state=="live"){
+		if(!cur){
+			cur = copyBrick(next);
+			next = newBrick();
+		}
 		if(canMove(cur,cur.x,(cur.y +1))){
 			cur.y++;
 			setTimeout(doGame,300-(game.level*20));
 		}
 		else{
 			if(cur.y>0){
-				placeBrick(cur,cur.x,cur.y);
-				cur = copyBrick(next);
-				next = newBrick();
-				setTimeout(doGame,300-(game.level*10));
+				if(!placeBrick(cur,cur.x,cur.y)){
+					setTimeout(doGame,300-(game.level*10));
+				}
+				cur = false;
 			}
 			else{
 				//Game Over
@@ -156,7 +159,6 @@ function createBricks(){
 }
 function newBrick(){
 	let r = bricks[Math.floor(Math.random()*7)];
-	
 	r.x=4;
 	r.y=0;
 	for(let i= Math.floor(Math.random()*4);i>0;i--){
@@ -171,6 +173,7 @@ function newBrick(){
 //Swaps rows and columns ie 2x3 array -> 3x2 array
 //Read inners backwards
 function rotateBrick(brick){
+	if(!brick){return true;}
 	let rows = brick.shape.length;
 	let cols = brick.shape[0].length;
 	let output = new Array;
@@ -234,6 +237,7 @@ function rotateBrick(brick){
 
 //can a brick be moved to a position?
 function canMove(brick, x,y){
+	if(!brick){return true;}
 	//playfield bounds check 
 	if(x<0 || y<0 || x > (pf.length - brick.shape[0].length) || y>(pf[0].length - brick.shape.length)){
 		return false;
@@ -263,11 +267,12 @@ function placeBrick(brick,x,y){
 			}
 		}
 	}
-	checkLines(y,brick.shape.length);	
+	playSample(1,0,0,512,0,false);	
+	return checkLines(y,brick.shape.length);	
 }
 
 function checkLines(height,number){
-	let removed =0;
+	let removed =[];
 	for(let i=height;i<height+number;i++){
 		let full =true;
 		for(let j=0; j< pf.length;j++){
@@ -276,34 +281,67 @@ function checkLines(height,number){
 			}
 		}
 		if(full){
-			removeLine(i);
-			removed++;
-			game.lines++;
+			removed.push(i);
 		}
 	}
-	if(removed<1){
-		playSample(1,0,0,512,0,false);	
+	if(removed.length>0 && removed.length<4){
+		playSample(2,0.4,0,512,0,false);	
 	}
-	if(removed>0 && removed<4){
-		playSample(2,0,0,512,0,false);	
+	if(removed.length==4){
+		playSample(3,0.4,0,512,0,false);	
 	}
-	if(removed==4){
-		playSample(3,0,0,512,0,false);	
+	removeLines(removed,0);
+	if(removed.length>0){
+	 return true;
+	}
+	return false;
+}
+
+//Pause game logic, animate removal of lines
+function removeLines(lines,f){
+	let tiles = [13,14,15,0]
+	if(lines.length<1){
+	 return;
+	}
+	if(f>15){
+		lines.forEach(function(c,i,a){
+			removeLine(c);
+		});
+		game.state = "live";
+		game.lines += lines.length;
+		game.score += scores[lines.length]*(game.level+1);
+		if(game.level != Math.floor(game.lines/10)){
+			game.level = Math.floor(game.lines/10);
+			playSample(4,0,0,512,0,false);
+		}
+		setTimeout(doGame,300-(game.level*10));
+	}
+	else{
+		game.state="busy";
+		lines.forEach(function(c,i,a){
+			for(let i=0; i<pf.length;i++){
+				pf[i][c]=tiles[f%4];
+			}		
+		});
+		f++;
+		setTimeout(removeLines,64,lines,f)
 	}
 	
-	game.score += scores[removed]*(game.level+1);
-	if(game.level != Math.floor(game.lines/10)){
-		playSample(4,0,0,512,0,false);
-		game.level = Math.floor(game.lines/10);
-	}
 }
 
 //remove a line, shift others
 function removeLine(y){
+	let shifted = false;
 	for(let i=y;i>0;i--){
 		for(let j=0;j<pf.length;j++){
+			if(pf[j][i-1]>0){
+				shifted = true;
+			}
 			pf[j][i]=pf[j][i-1];
 		}
+	}
+	if(shifted){
+		playSample(8,0,0,512,0,false);
 	}
 }
 
@@ -409,6 +447,7 @@ function drawStatus(){
 }
 //draw a brick at current position of ctx
 function drawBrick(brick){
+	if(!brick){return;}
 	for(let i=0; i<brick.shape.length;i++){ //r
 		ctx.save();
 		for(let j=0;j<brick.shape[0].length;j++){//c

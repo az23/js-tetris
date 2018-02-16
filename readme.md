@@ -1,3 +1,17 @@
+  ___________________________________
+|AZ23:- Developer notes: Tetris v1.31|
+ ------------------------------------
+Changes:
+
+Now has "animation" on line clear.
+
+Some sound effects re-captured: specifically the ones which had the block landing sound prepended.
+
+Added the sound effect for the rows settling after a line clear.
+
+Known Issues:  As before but now the game over sound plays correctly.
+
+ 
  ___________________________________
 |AZ23:- Developer notes: Tetris v1.3|
  -----------------------------------
@@ -34,7 +48,7 @@ Added sound - now uses MidiDecoder and GEBAS for audio output, SFX recorded from
 
 Basic intro screen - Will take place of title screen for now
 
-Fixed drawing of straight block - Now each block of each brick has it's tile stored seperately when the straight block is rotated, these are changed so that the outlines are drawn correctly.
+Fixed drawing of straight block - Now each block of each brick has its tile stored seperately when the straight block is rotated, these are changed so that the outlines are drawn correctly.
 
 
 Known Issues:
