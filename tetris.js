@@ -101,18 +101,17 @@ function setListeners(){
 }
 
 function pauseGame(){
+	if(game.state != "live" && game.state != "paused"){return;}
 	if(game.state=="live"){
 		game.state="paused";
-		pauseMusic();
-		playSample(7,0,0,512,0,false);
 	}
-	else if(game.state=="paused"){
-		game.state="live";
-		setTimeout(doGame,300-(game.level*20));
-		playSample(7,0,0,512,0,false);
-		pauseMusic();
+	else{
+		game.state="live"
 	}
+	playSample(7,0,0,512,0,false);
+	pauseMusic();
 }
+
 
 function startGame(){
 	game.state="live";
