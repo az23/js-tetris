@@ -119,6 +119,10 @@ function startGame(){
 }
 //per gameclock
 function doGame(){
+
+	if(game.state == "paused"){
+		setTimeout(doGame,300-(game.level*10));
+	}
 	if(game.state=="live"){
 		if(!cur){
 			cur = copyBrick(next);
