@@ -2,7 +2,7 @@
 //az23
 "use strict";
 //globals
-const version = 1.31;
+const version = 1.32;
 var pf;
 var c;
 var ctx;
@@ -273,6 +273,7 @@ function placeBrick(brick,x,y){
 
 function checkLines(height,number){
 	let removed =[];
+	let copies= [];
 	for(let i=height;i<height+number;i++){
 		let full =true;
 		for(let j=0; j< pf.length;j++){
@@ -281,6 +282,11 @@ function checkLines(height,number){
 			}
 		}
 		if(full){
+			let dupe=[]						//copy out the line for reuse
+			for(let k=0;k<pf.length; k++){
+				dupe.push(pf[k][i])
+			}
+			copies.push(dupe)
 			removed.push(i);
 		}
 	}
@@ -290,7 +296,7 @@ function checkLines(height,number){
 	if(removed.length==4){
 		playSample(3,0.4,0,512,0,false);	
 	}
-	removeLines(removed,0);
+	removeLines(removed,copies,0);
 	if(removed.length>0){
 	 return true;
 	}
@@ -298,8 +304,8 @@ function checkLines(height,number){
 }
 
 //Pause game logic, animate removal of lines
-function removeLines(lines,f){
-	let tiles = [13,14,15,0]
+function removeLines(lines,copies,f){
+	
 	if(lines.length<1){
 	 return;
 	}
@@ -319,12 +325,20 @@ function removeLines(lines,f){
 	else{
 		game.state="busy";
 		lines.forEach(function(c,i,a){
-			for(let i=0; i<pf.length;i++){
-				pf[i][c]=tiles[f%4];
-			}		
+			
+				for(let j=0; j<pf.length;j++){
+					if(f%2==0){
+						pf[j][c]=0;
+					}
+					else{
+						pf[j][c] = copies[i][j];
+					}
+				}
+			
+			
 		});
 		f++;
-		setTimeout(removeLines,64,lines,f)
+		setTimeout(removeLines,64,lines,copies,f)
 	}
 	
 }
